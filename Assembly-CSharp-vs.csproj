@@ -50,6 +50,8 @@
      <Compile Include="Assets\Scripts\Bird2.cs" />
      <Compile Include="Assets\Scripts\Bird3.cs" />
      <Compile Include="Assets\Scripts\Bird4.cs" />
+     <Compile Include="Assets\Scripts\ClickBottomArrow.cs" />
+     <Compile Include="Assets\Scripts\ClickTopArrow.cs" />
      <Compile Include="Assets\Scripts\Clouds.cs" />
      <Compile Include="Assets\Scripts\Coins.cs" />
      <Compile Include="Assets\Scripts\Comet.cs" />
@@ -58,6 +60,7 @@
      <Compile Include="Assets\Scripts\GenerateClouds.cs" />
      <Compile Include="Assets\Scripts\GenerateClouds2.cs" />
      <Compile Include="Assets\Scripts\GenerateCoins.cs" />
+     <Compile Include="Assets\Scripts\GenerateComet.cs" />
      <Compile Include="Assets\Scripts\GenerateJetpack.cs" />
      <Compile Include="Assets\Scripts\GenerateLife.cs" />
      <Compile Include="Assets\Scripts\Jetpack.cs" />

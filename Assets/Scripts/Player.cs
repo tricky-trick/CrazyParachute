@@ -5,6 +5,7 @@ using System.Linq;
 public class Player : MonoBehaviour
 {
 	int score = 0;
+	int highscore = 0;
 	int life = 3;
 	float time = 60f;
 	float timeJetack = 10f;
@@ -29,10 +30,10 @@ public class Player : MonoBehaviour
 	public Sprite[] playerSpritesJP;
 	
 	GUIStyle largeFont;
-
-
+	
 	void Start()
 	{
+		PlayerPrefs.SetInt("isJetPack", 0);
 		score = PlayerPrefs.GetInt("score");
 		isJetpack = false;
 		HideChildren ();
@@ -43,10 +44,27 @@ public class Player : MonoBehaviour
 		largeFont.fontSize = 30;
 		largeFont.normal.textColor = Color.white;
 	}
-	
+	Camera camera;
 	// Update is called once per frame
 	void Update ()
 	{
+
+
+		//make screen into ray point
+		Ray touchPos = Camera.main.ScreenPointToRay(Input.mousePosition);
+		float speed = 0;
+		if (isJetpack){
+			speed = 1.5f;
+		}
+		else{
+			speed = 0.7f;
+		}
+
+		if(Input.touchCount>0 || Input.GetMouseButton (0)) {
+			rigidbody2D.transform.Translate(touchPos.origin.x * speed * Time.deltaTime, touchPos.origin.y * speed * Time.deltaTime, 0);  
+		}
+
+
 		// Left
 		if (Input.GetKey(KeyCode.LeftArrow))
 		{
@@ -85,77 +103,77 @@ public class Player : MonoBehaviour
 
 
 
-		if (Input.touchCount > 0){
-			foreach (Touch touch in Input.touches)
-			{
-				switch (touch.phase)
-				{
-				case TouchPhase.Began :
-					/* this is a new touch */
-					isSwipe = true;
-					fingerStartTime = Time.time;
-					fingerStartPos = touch.position;
-					break;
-					
-				case TouchPhase.Canceled :
-					/* The touch is being canceled */
-					isSwipe = false;
-					break;
-					
-				case TouchPhase.Ended :
-					float gestureTime = Time.time - fingerStartTime;
-					float gestureDist = (touch.position - fingerStartPos).magnitude;
-					
-					if (isSwipe && gestureTime < maxSwipeTime && gestureDist > minSwipeDist){
-						Vector2 direction = touch.position - fingerStartPos;
-						Vector2 swipeType = Vector2.zero;
-						
-						if (Mathf.Abs(direction.x) > Mathf.Abs(direction.y)){
-							// the swipe is horizontal:
-							swipeType = Vector2.right * Mathf.Sign(direction.x);
-						}else{
-							// the swipe is vertical:
-							swipeType = Vector2.up * Mathf.Sign(direction.y);
-						}
-						if(swipeType.x != 0.0f){
-							if(swipeType.x > 0.0f){
-								rigidbody2D.velocity = Vector2.zero;
-								rigidbody2D.AddForce(right);
-								if(rotation < 0 ){
-									transform.Rotate(0, 0, -10.0f);
-									rotation += 10;
-								}
-								else if(rotation == 0){
-									transform.Rotate(0, 0, -5.0f);
-									rotation += 5;
-								}
-
-							}else{
-								rigidbody2D.velocity = Vector2.zero;
-								rigidbody2D.AddForce(left);
-								if(rotation > 0){
-									transform.Rotate(0, 0, 10.0f);
-									rotation -= 10;
-								}
-								else if(rotation == 0){
-									transform.Rotate(0, 0, 5.0f);
-									rotation -= 5;
-								}
-							}
-						}
-						if(swipeType.y != 0.0f ){
-							if(swipeType.y > 0.0f){
-								rigidbody2D.AddForce(up);
-							}else{
-								rigidbody2D.AddForce(down);
-							}
-						}
-					}
-					
-					break;
-				}
-			}
-		}
+//		if (Input.touchCount > 0){
+//			foreach (Touch touch in Input.touches)
+//			{
+//				switch (touch.phase)
+//				{
+//				case TouchPhase.Began :
+//					/* this is a new touch */
+//					isSwipe = true;
+//					fingerStartTime = Time.time;
+//					fingerStartPos = touch.position;
+//					break;
+//					
+//				case TouchPhase.Canceled :
+//					/* The touch is being canceled */
+//					isSwipe = false;
+//					break;
+//					
+//				case TouchPhase.Ended :
+//					float gestureTime = Time.time - fingerStartTime;
+//					float gestureDist = (touch.position - fingerStartPos).magnitude;
+//					
+//					if (isSwipe && gestureTime < maxSwipeTime && gestureDist > minSwipeDist){
+//						Vector2 direction = touch.position - fingerStartPos;
+//						Vector2 swipeType = Vector2.zero;
+//						
+//						if (Mathf.Abs(direction.x) > Mathf.Abs(direction.y)){
+//							// the swipe is horizontal:
+//							swipeType = Vector2.right * Mathf.Sign(direction.x);
+//						}else{
+//							// the swipe is vertical:
+//							swipeType = Vector2.up * Mathf.Sign(direction.y);
+//						}
+//						if(swipeType.x != 0.0f){
+//							if(swipeType.x > 0.0f){
+//								rigidbody2D.velocity = Vector2.zero;
+//								rigidbody2D.AddForce(right);
+//								if(rotation < 0 ){
+//									transform.Rotate(0, 0, -10.0f);
+//									rotation += 10;
+//								}
+//								else if(rotation == 0){
+//									transform.Rotate(0, 0, -5.0f);
+//									rotation += 5;
+//								}
+//
+//							}else{
+//								rigidbody2D.velocity = Vector2.zero;
+//								rigidbody2D.AddForce(left);
+//								if(rotation > 0){
+//									transform.Rotate(0, 0, 10.0f);
+//									rotation -= 10;
+//								}
+//								else if(rotation == 0){
+//									transform.Rotate(0, 0, 5.0f);
+//									rotation -= 5;
+//								}
+//							}
+//						}
+//						if(swipeType.y != 0.0f ){
+//							if(swipeType.y > 0.0f){
+//								rigidbody2D.AddForce(up);
+//							}else{
+//								rigidbody2D.AddForce(down);
+//							}
+//						}
+//					}
+//					
+//					break;
+//				}
+//			}
+//		}
 
 		if (transform.position.y > 7)
 		{
@@ -181,6 +199,7 @@ public class Player : MonoBehaviour
 			PlayerPrefs.SetInt("score",score);
 		}
 		if (isJetpack) {
+			PlayerPrefs.SetInt("isJetPack", 1);
 			left = new Vector2(-200, 0);
 			right = new Vector2(200, 0);
 			up = new Vector2(0, 150);
@@ -196,8 +215,11 @@ public class Player : MonoBehaviour
 												player.GetComponent<SpriteRenderer> ().sprite = s;
 												break;
 										}
+								//rigidbody2D.velocity = Vector2.zero;
+
 						}
 				} else {
+			PlayerPrefs.SetInt("isJetPack", 0);
 			up = new Vector2(0, 0);
 			left = new Vector2(-100, 0);
 			right = new Vector2(100, 0);
@@ -214,7 +236,11 @@ public class Player : MonoBehaviour
 	
 	void Die()
 	{
-
+		if (score > highscore){
+			highscore = score;
+			PlayerPrefs.SetInt("highscore", highscore);
+		}
+		PlayerPrefs.SetInt("score", 0);
 		Application.LoadLevel(0);
 	}
 	
@@ -262,6 +288,7 @@ public class Player : MonoBehaviour
 				{
 				if (life > 0){
 					life--;
+					Destroy (other.gameObject); 
 					transform.position = new Vector2(0.0f, 5.0f);
 					timeBlinking = 3;
 					InvokeRepeating("Blinking", 0.0f, 0.2f);
@@ -328,7 +355,6 @@ public class Player : MonoBehaviour
 
 	IEnumerator Wait(float seconds)
 	{
-		Debug.Log ("Wait");
 		transform.renderer.enabled = false;
 		yield return new WaitForSeconds(seconds); 
 		transform.renderer.enabled = true;
