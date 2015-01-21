@@ -9,4 +9,12 @@ public class PlayGameButton : MonoBehaviour {
 			Application.LoadLevel(Application.loadedLevel + 1);
 		}
 	}
+
+	void OnGUI () {
+		int score = PlayerPrefs.GetInt("score");
+		var centeredStyle = GUI.skin.GetStyle("Label");
+		centeredStyle.alignment = TextAnchor.UpperCenter;
+		centeredStyle.fontSize = 20;
+		GUI.Label (new Rect (Screen.width/2-50, Screen.height/2-25, 100, 50), "Score: " + score.ToString(), centeredStyle);
+	}
 }

@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Linq;
+using UnityEngine.UI;
 
 public class Player : MonoBehaviour
 {
@@ -20,17 +21,21 @@ public class Player : MonoBehaviour
 	
 	// The force which is added when the player jumps
 	// This can be changed in the Inspector window
-	public Vector2 left = new Vector2(-100, 0);
-	public Vector2 right = new Vector2(100, 0);
-	public Vector2 up = new Vector2(0, 0);
-	public Vector2 down = new Vector2(0, -50);
+	public Vector2 left = new Vector2(-150, 0);
+	public Vector2 right = new Vector2(150, 0);
+	public Vector2 up = new Vector2(0, 20);
+	public Vector2 down = new Vector2(0, -150);
 	GameObject player;
 	int rotation = 0;
 	public Sprite[] playerSpritesParachute;
 	public Sprite[] playerSpritesJP;
 	
 	GUIStyle largeFont;
-	
+
+	GameObject arrowTop;
+	GameObject arrowBottom;
+
+
 	void Start()
 	{
 		PlayerPrefs.SetInt("isJetPack", 0);
@@ -39,30 +44,73 @@ public class Player : MonoBehaviour
 		HideChildren ();
 		HideExplode ();
 		player = GameObject.FindGameObjectWithTag("Player");
+		arrowTop = GameObject.FindGameObjectWithTag("arrow_top");
+		arrowBottom = GameObject.FindGameObjectWithTag("arrow_bottom");
 		largeFont = new GUIStyle();
 
 		largeFont.fontSize = 30;
 		largeFont.normal.textColor = Color.white;
 	}
-	Camera camera;
-	// Update is called once per frame
+
 	void Update ()
 	{
+		RaycastHit hit;
+		Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+		if ((Input.touchCount > 0 && Input.GetTouch (0).phase == TouchPhase.Began) || (Input.GetMouseButtonDown(0))) 
+		{
+			if (Physics.Raycast(ray, out hit)) {
+				if (hit.transform.tag == "arrow_bottom" ){
+					rigidbody2D.velocity = Vector2.zero;
+					rigidbody2D.AddForce(down);
+				}
 
+				if (hit.transform.tag == "arrow_top" ){
+					rigidbody2D.velocity = Vector2.zero;
+					rigidbody2D.AddForce(up);
+				}
 
-		//make screen into ray point
-		Ray touchPos = Camera.main.ScreenPointToRay(Input.mousePosition);
-		float speed = 0;
-		if (isJetpack){
-			speed = 1.5f;
-		}
-		else{
-			speed = 0.7f;
+				if (hit.transform.tag == "arrow_left" ){
+					rigidbody2D.velocity = Vector2.zero;
+					rigidbody2D.AddForce(left);
+					if(rotation > 0 ){
+						transform.Rotate(0, 0, 10.0f);
+						rotation -= 10;
+					}
+					else if(rotation == 0){
+						transform.Rotate(0, 0, 5.0f);
+						rotation -= 5;
+					}
+				}
+
+				if (hit.transform.tag == "arrow_right" ){
+					rigidbody2D.velocity = Vector2.zero;
+					rigidbody2D.AddForce(right);
+					if(rotation < 0 ){
+						transform.Rotate(0, 0, -10.0f);
+						rotation += 10;
+					}
+					else if(rotation == 0){
+						transform.Rotate(0, 0, -5.0f);
+						rotation += 5;
+					}
+				}
+
+			}
 		}
 
-		if(Input.touchCount>0 || Input.GetMouseButton (0)) {
-			rigidbody2D.transform.Translate(touchPos.origin.x * speed * Time.deltaTime, touchPos.origin.y * speed * Time.deltaTime, 0);  
-		}
+		//make screen into ray poin	t
+//		Ray touchPos = Camera.main.ScreenPointToRay(Input.mousePosition);
+//		float speed = 0;
+//		if (isJetpack){
+//			speed = 1.5f;
+//		}
+//		else{
+//			speed = 0.7f;
+//		}
+//
+//		if(Input.touchCount>0 || Input.GetMouseButton (0)) {
+//			rigidbody2D.transform.Translate(touchPos.origin.x * speed * Time.deltaTime, touchPos.origin.y * speed * Time.deltaTime, 0);  
+//		}
 
 
 		// Left
@@ -200,10 +248,10 @@ public class Player : MonoBehaviour
 		}
 		if (isJetpack) {
 			PlayerPrefs.SetInt("isJetPack", 1);
-			left = new Vector2(-200, 0);
-			right = new Vector2(200, 0);
-			up = new Vector2(0, 150);
-			down = new Vector2(0, -150);
+			left = new Vector2(-250, 0);
+			right = new Vector2(250, 0);
+			up = new Vector2(0, 250);
+			down = new Vector2(0, -250);
 						timeJetack -= Time.deltaTime;
 						if (timeJetack < 0) {
 								isJetpack = false;
@@ -220,10 +268,10 @@ public class Player : MonoBehaviour
 						}
 				} else {
 			PlayerPrefs.SetInt("isJetPack", 0);
-			up = new Vector2(0, 0);
-			left = new Vector2(-100, 0);
-			right = new Vector2(100, 0);
-			down = new Vector2(0, -50);
+			up = new Vector2(0, 20);
+			left = new Vector2(-150, 0);
+			right = new Vector2(150, 0);
+			down = new Vector2(0, -150);
 				}
 
 		timeBlinking -= Time.deltaTime;
