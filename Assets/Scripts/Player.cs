@@ -32,24 +32,32 @@ public class Player : MonoBehaviour
 	
 	GUIStyle largeFont;
 
-	GameObject arrowTop;
-	GameObject arrowBottom;
-
 
 	void Start()
 	{
-		PlayerPrefs.SetInt("isJetPack", 0);
 		score = PlayerPrefs.GetInt("score");
 		isJetpack = false;
 		HideChildren ();
 		HideExplode ();
 		player = GameObject.FindGameObjectWithTag("Player");
-		arrowTop = GameObject.FindGameObjectWithTag("arrow_top");
-		arrowBottom = GameObject.FindGameObjectWithTag("arrow_bottom");
 		largeFont = new GUIStyle();
 
 		largeFont.fontSize = 30;
 		largeFont.normal.textColor = Color.white;
+
+		if(Application.loadedLevel == 5){
+			playerSpritesJP = Resources.LoadAll<Sprite>("jetpack_man");
+			foreach(Sprite s in playerSpritesJP)
+			if (s.name.Equals("jetpack_man")){
+				player.GetComponent<SpriteRenderer>().sprite = s;
+				break;
+			}
+			ShowChildren();
+			left = new Vector2(-100, 0);
+			right = new Vector2(100, 0);
+			up = new Vector2(0, 100);
+			down = new Vector2(0, -200);
+		}
 	}
 
 	void Update ()
@@ -223,22 +231,41 @@ public class Player : MonoBehaviour
 //			}
 //		}
 
-		if (transform.position.y > 7)
-		{
-			transform.position = new Vector2(transform.position.x, -6);
+		if(Application.loadedLevel == 5){
+			if(transform.position.y > 8 || transform.position.y < -8 || transform.position.x > 7 || transform.position.x < -7){
+				if (life > 0){
+					life--;
+					transform.position = new Vector2(0.0f, 5.0f);
+					timeBlinking = 1;
+					InvokeRepeating("Blinking", 0.0f, 0.2f);
+				}
+				else{
+					
+					Die();
+				}
+			}
 		}
-		if(transform.position.y < -7)
-		{
-			transform.position = new Vector2(transform.position.x, 6);
+		else{
+			if(transform.position.y > 7)
+			{
+				transform.position = new Vector2(transform.position.x, -6);
+			}
+			if(transform.position.y < -7)
+			{
+				transform.position = new Vector2(transform.position.x, 6);
+			}
+			if (transform.position.x > 6)
+			{
+				transform.position = new Vector2(-5, transform.position.y);
+			}
+			if (transform.position.x < -6) 
+			{
+				transform.position = new Vector2(5, transform.position.y);
+			}
 		}
-		if (transform.position.x > 6)
-		{
-			transform.position = new Vector2(-5, transform.position.y);
-		}
-		if (transform.position.x < -6) 
-		{
-			transform.position = new Vector2(5, transform.position.y);
-		}
+
+
+
 
 		time -= Time.deltaTime;
 		if ( time < 0 )
@@ -246,8 +273,8 @@ public class Player : MonoBehaviour
 			Application.LoadLevel(Application.loadedLevel + 1);
 			PlayerPrefs.SetInt("score",score);
 		}
+		if(Application.loadedLevel != 5){
 		if (isJetpack) {
-			PlayerPrefs.SetInt("isJetPack", 1);
 			left = new Vector2(-250, 0);
 			right = new Vector2(250, 0);
 			up = new Vector2(0, 250);
@@ -267,17 +294,18 @@ public class Player : MonoBehaviour
 
 						}
 				} else {
-			PlayerPrefs.SetInt("isJetPack", 0);
 			up = new Vector2(0, 20);
 			left = new Vector2(-150, 0);
 			right = new Vector2(150, 0);
 			down = new Vector2(0, -150);
 				}
+		}
 
 		timeBlinking -= Time.deltaTime;
-		if (timeBlinking < 0) {
+		if (timeBlinking <= 0) {
 			CancelInvoke();
 		}
+
 
 	}
 
@@ -298,7 +326,9 @@ public class Player : MonoBehaviour
 		GUILayout.Label(" Score: " + score.ToString(), largeFont);
 		GUILayout.Label(" Time: " + time.ToString("0"), largeFont);
 		GUILayout.Label(" Life: " + life.ToString(), largeFont);
-		GUILayout.Label(" Jetpack: " + timeJetack.ToString("0"), largeFont);
+		if(Application.loadedLevel != 5){
+			GUILayout.Label(" Jetpack: " + timeJetack.ToString("0"), largeFont);
+		}
 	}
 
 
@@ -330,9 +360,24 @@ public class Player : MonoBehaviour
 			life++;
 			Destroy (other.gameObject);
 		}
+		else if (other.tag == "wall"){
+			if(timeBlinking<=0)
+			{
+				if (life > 0){
+					life--;
+					transform.position = new Vector2(0.0f, 5.0f);
+					timeBlinking = 1;
+					InvokeRepeating("Blinking", 0.0f, 0.2f);
+				}
+				else{
+					
+					Die();
+				}
+			}
+		}
 		else {
 			if(!isJetpack){
-				if(timeBlinking<0)
+				if(timeBlinking<=0)
 				{
 				if (life > 0){
 					life--;
