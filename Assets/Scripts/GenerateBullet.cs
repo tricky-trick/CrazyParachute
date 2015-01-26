@@ -8,7 +8,7 @@ public class GenerateBullet: MonoBehaviour {
 	// Use this for initialization
 	void Start()
 	{
-		InvokeRepeating("CreateObstacle", Random.Range(0.0F, 1.0F), Random.Range(15.0F, 15.0F));
+		InvokeRepeating("CreateObstacle", 0.0F, 6.0F);
 	}
 	
 	void CreateObstacle()

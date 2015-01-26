@@ -9,4 +9,10 @@ public class Wall : MonoBehaviour {
 		Vector2 velocity = new Vector2(0,1.0f);
 		rigidbody2D.velocity = velocity;
 	}
+
+	void Update()
+	{
+		if(rigidbody2D.transform.position.y > 25)
+			Destroy(rigidbody2D.gameObject);
+	}
 }

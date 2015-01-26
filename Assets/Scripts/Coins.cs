@@ -10,4 +10,10 @@ public class Coins : MonoBehaviour {
 		rigidbody2D.velocity = velocity;
 	}
 
+	void Update()
+	{
+		if(rigidbody2D.transform.position.y > 10)
+			Destroy(rigidbody2D.gameObject);
+	}
+
 }

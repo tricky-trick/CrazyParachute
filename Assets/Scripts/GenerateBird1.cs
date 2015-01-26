@@ -8,7 +8,7 @@ public class GenerateBird1 : MonoBehaviour {
 	// Use this for initialization
 	void Start()
 	{
-		InvokeRepeating("CreateObstacle", 1f, Random.Range(8.0F, 15.0F));
+		InvokeRepeating("CreateObstacle", 5f, Random.Range(8.0F, 15.0F));
 	}
 	
 	void CreateObstacle()

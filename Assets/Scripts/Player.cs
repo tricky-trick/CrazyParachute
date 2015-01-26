@@ -9,6 +9,7 @@ public class Player : MonoBehaviour
 	int highscore = 0;
 	int life = 3;
 	float time = 60f;
+	float timeToTransformation = 2.0f;
 	float timeJetack = 10f;
 	bool isJetpack;
 	float timeBlinking = 0;
@@ -29,6 +30,7 @@ public class Player : MonoBehaviour
 	int rotation = 0;
 	public Sprite[] playerSpritesParachute;
 	public Sprite[] playerSpritesJP;
+	public Sprite[] playerSpritesSki;
 	
 	GUIStyle largeFont;
 
@@ -43,7 +45,7 @@ public class Player : MonoBehaviour
 		largeFont = new GUIStyle();
 
 		largeFont.fontSize = 30;
-		largeFont.normal.textColor = Color.white;
+		largeFont.normal.textColor = Color.red;
 
 		if(Application.loadedLevel == 5){
 			playerSpritesJP = Resources.LoadAll<Sprite>("jetpack_man");
@@ -62,45 +64,27 @@ public class Player : MonoBehaviour
 
 	void Update ()
 	{
+		Vector2 viewPos = Camera.main.WorldToViewportPoint(transform.position);
+
 		RaycastHit hit;
 		Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
 		if ((Input.touchCount > 0 && Input.GetTouch (0).phase == TouchPhase.Began) || (Input.GetMouseButtonDown(0))) 
 		{
 			if (Physics.Raycast(ray, out hit)) {
 				if (hit.transform.tag == "arrow_bottom" ){
-					rigidbody2D.velocity = Vector2.zero;
-					rigidbody2D.AddForce(down);
+					MoveDown();
 				}
 
 				if (hit.transform.tag == "arrow_top" ){
-					rigidbody2D.velocity = Vector2.zero;
-					rigidbody2D.AddForce(up);
+					MoveUp();
 				}
 
 				if (hit.transform.tag == "arrow_left" ){
-					rigidbody2D.velocity = Vector2.zero;
-					rigidbody2D.AddForce(left);
-					if(rotation > 0 ){
-						transform.Rotate(0, 0, 10.0f);
-						rotation -= 10;
-					}
-					else if(rotation == 0){
-						transform.Rotate(0, 0, 5.0f);
-						rotation -= 5;
-					}
+					MoveLeft();
 				}
 
 				if (hit.transform.tag == "arrow_right" ){
-					rigidbody2D.velocity = Vector2.zero;
-					rigidbody2D.AddForce(right);
-					if(rotation < 0 ){
-						transform.Rotate(0, 0, -10.0f);
-						rotation += 10;
-					}
-					else if(rotation == 0){
-						transform.Rotate(0, 0, -5.0f);
-						rotation += 5;
-					}
+					MoveRight();
 				}
 
 			}
@@ -124,37 +108,25 @@ public class Player : MonoBehaviour
 		// Left
 		if (Input.GetKey(KeyCode.LeftArrow))
 		{
-			rigidbody2D.velocity = Vector2.zero;
-			rigidbody2D.AddForce(left);
-			if(rotation > -5){
-				transform.Rotate(0, 0, 10.0f);
-				rotation -= 5;
-			}
+			MoveLeft();
 		
 		}
 
 		//Right
 		if (Input.GetKey(KeyCode.RightArrow))
 		{
-			rigidbody2D.velocity = Vector2.zero;
-			rigidbody2D.AddForce(right);
-			if(rotation < 5){
-				transform.Rotate(0, 0, -10.0f);
-				rotation += 5;
-			}
+			MoveRight();
 		
 		}
 
 		if (Input.GetKey (KeyCode.UpArrow)) 
 		{
-			rigidbody2D.velocity = Vector2.zero;
-			rigidbody2D.AddForce(up);
+			MoveUp();
 		}
 
 		if (Input.GetKey (KeyCode.DownArrow)) 
 		{
-			rigidbody2D.velocity = Vector2.zero;
-			rigidbody2D.AddForce(down);
+			MoveDown();
 		}
 
 
@@ -233,16 +205,12 @@ public class Player : MonoBehaviour
 
 		if(Application.loadedLevel == 5){
 			if(transform.position.y > 8 || transform.position.y < -8 || transform.position.x > 7 || transform.position.x < -7){
-				if (life > 0){
-					life--;
-					transform.position = new Vector2(0.0f, 5.0f);
-					timeBlinking = 1;
-					InvokeRepeating("Blinking", 0.0f, 0.2f);
-				}
-				else{
-					
-					Die();
-				}
+				Die ();
+			}
+		}
+		else if(Application.loadedLevel == 9){
+			if(transform.position.y > 8 || transform.position.y < -8 || transform.position.x > 6 || transform.position.x < -6){
+					transform.position = new Vector2(0.0f, 6.0f);
 			}
 		}
 		else{
@@ -288,6 +256,9 @@ public class Player : MonoBehaviour
 								foreach (Sprite s in playerSpritesParachute)
 										if (s.name.Equals ("player")) {
 												player.GetComponent<SpriteRenderer> ().sprite = s;
+												player.GetComponent<SpriteRenderer>().sprite = s;
+												Destroy(GetComponent<PolygonCollider2D>());
+												player.AddComponent<PolygonCollider2D>();
 												break;
 										}
 								//rigidbody2D.velocity = Vector2.zero;
@@ -306,18 +277,50 @@ public class Player : MonoBehaviour
 			CancelInvoke();
 		}
 
+		if (Application.loadedLevel == 9){
+			timeToTransformation -= Time.deltaTime;
+			if ( timeToTransformation < 0 )
+			{
+				playerSpritesSki = Resources.LoadAll<Sprite>("ski_man");
+				foreach(Sprite s in playerSpritesSki)
+				if (s.name.Equals("ski_man")){
+					player.GetComponent<SpriteRenderer>().sprite = s;
+					Destroy(GetComponent<PolygonCollider2D>());
+					player.AddComponent<PolygonCollider2D>();
+					break;
+				}
+			}
+
+			float maxSpeed = 3.0f;
+			if(rigidbody2D.velocity.magnitude > maxSpeed)
+			{
+				rigidbody2D.velocity = rigidbody2D.velocity.normalized * maxSpeed;
+			}
+
+			if(transform.rotation.z >= 80 &&  transform.rotation.z <= 330){
+				Die();
+			}
+		}
 
 	}
 
 	
 	void Die()
 	{
-		if (score > highscore){
-			highscore = score;
-			PlayerPrefs.SetInt("highscore", highscore);
+		if (life > 0){
+			life--;
+			transform.position = new Vector2(0.0f, 5.0f);
+			timeBlinking = 3;
+			InvokeRepeating("Blinking", 0.0f, 0.2f);
 		}
-		PlayerPrefs.SetInt("score", 0);
-		Application.LoadLevel(0);
+		else{
+			if (score > highscore){
+				highscore = score;
+				PlayerPrefs.SetInt("highscore", highscore);
+			}
+			PlayerPrefs.SetInt("score", 0);
+			Application.LoadLevel(0);
+		}
 	}
 	
 
@@ -337,6 +340,7 @@ public class Player : MonoBehaviour
 		// load all frames in fruitsSprites array
 		playerSpritesJP = Resources.LoadAll<Sprite>("jetpack_man");
 		playerSpritesParachute = Resources.LoadAll<Sprite>("player");
+		playerSpritesSki = Resources.LoadAll<Sprite>("ski_man");
 	}
 	void OnTriggerEnter2D (Collider2D other)
 	{
@@ -349,6 +353,9 @@ public class Player : MonoBehaviour
 			foreach(Sprite s in playerSpritesJP)
 			if (s.name.Equals("jetpack_man")){
 				player.GetComponent<SpriteRenderer>().sprite = s;
+				player.GetComponent<SpriteRenderer>().sprite = s;
+				Destroy(GetComponent<PolygonCollider2D>());
+				player.AddComponent<PolygonCollider2D>();
 				break;
 			}
 			Destroy (other.gameObject); 
@@ -363,33 +370,14 @@ public class Player : MonoBehaviour
 		else if (other.tag == "wall"){
 			if(timeBlinking<=0)
 			{
-				if (life > 0){
-					life--;
-					transform.position = new Vector2(0.0f, 5.0f);
-					timeBlinking = 1;
-					InvokeRepeating("Blinking", 0.0f, 0.2f);
-				}
-				else{
-					
-					Die();
-				}
+				Die ();
 			}
 		}
 		else {
 			if(!isJetpack){
 				if(timeBlinking<=0)
 				{
-				if (life > 0){
-					life--;
-					Destroy (other.gameObject); 
-					transform.position = new Vector2(0.0f, 5.0f);
-					timeBlinking = 3;
-					InvokeRepeating("Blinking", 0.0f, 0.2f);
-				}
-				else{
-
-						Die();
-					}
+					Die ();
 				}
 			}
 			else
@@ -467,6 +455,73 @@ public class Player : MonoBehaviour
 	void Explosion()
 	{
 		StartCoroutine( WaitForExplode ());
+	}
+	
+
+	private void MoveLeft()
+	{
+		if (Application.loadedLevel != 9){
+			rigidbody2D.velocity = Vector2.zero;
+			rigidbody2D.AddForce(left);
+			if(rotation > 0 ){
+				transform.Rotate(0, 0, 10.0f);
+				rotation -= 10;
+			}
+			else if(rotation == 0){
+				transform.Rotate(0, 0, 2.0f);
+				rotation -= 5;
+			}
+		}
+		else{
+			transform.Rotate(0, 0, 5.0f);
+			left = new Vector2(-20,0);
+			rigidbody2D.AddForce(left);
+		}
+	}
+
+	private void MoveRight()
+	{
+		if (Application.loadedLevel != 9){
+			rigidbody2D.velocity = Vector2.zero;
+			rigidbody2D.AddForce(right);
+			if(rotation < 0 ){
+				transform.Rotate(0, 0, -10.0f);
+				rotation += 10;
+			}
+			else if(rotation == 0){
+				transform.Rotate(0, 0, -2.0f);
+				rotation += 5;
+			}
+		}
+		else{
+			transform.Rotate(0, 0, -5.0f);
+			right = new Vector2(20,0);
+			rigidbody2D.AddForce(right);
+		}
+	}
+
+	private void MoveUp()
+	{
+		if (Application.loadedLevel != 9){
+			rigidbody2D.velocity = Vector2.zero;
+			rigidbody2D.AddForce(up);
+		}
+		else{
+			up = new Vector2(0,1000);
+			//rigidbody2D.velocity = new Vector2(0,50);
+			rigidbody2D.AddForce(up, ForceMode2D.Impulse);
+		}
+	}
+
+	private void MoveDown()
+	{
+		if (Application.loadedLevel != 9){
+			rigidbody2D.velocity = Vector2.zero;
+			rigidbody2D.AddForce(down);
+		}
+		else{
+			rigidbody2D.AddForce(down);
+		}
 	}
 
 }
