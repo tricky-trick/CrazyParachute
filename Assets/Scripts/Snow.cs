@@ -13,7 +13,7 @@ public class Snow : MonoBehaviour {
 
 	void Update()
 	{
-		if(rigidbody2D.transform.position.y > -10)
+		if(rigidbody2D.transform.position.y < -20)
 			Destroy(rigidbody2D.gameObject);
 	}
 }

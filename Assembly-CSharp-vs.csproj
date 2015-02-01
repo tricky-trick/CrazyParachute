@@ -65,6 +65,7 @@
      <Compile Include="Assets\Scripts\GenerateComet.cs" />
      <Compile Include="Assets\Scripts\GenerateJetpack.cs" />
      <Compile Include="Assets\Scripts\GenerateLife.cs" />
+     <Compile Include="Assets\Scripts\GenerateNextLevel.cs" />
      <Compile Include="Assets\Scripts\GenerateSnow.cs" />
      <Compile Include="Assets\Scripts\GenerateSnowroad.cs" />
      <Compile Include="Assets\Scripts\GenerateThorn.cs" />

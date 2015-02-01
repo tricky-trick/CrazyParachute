@@ -8,7 +8,9 @@ public class GenerateLife: MonoBehaviour {
 	// Use this for initialization
 	void Start()
 	{
-		InvokeRepeating("CreateObstacle", Random.Range(30.0F, 60.0F), Random.Range(30.0F, 60.0F));
+		GameObject life = GameObject.Find("life5");
+		if(life.renderer.enabled == false)
+			InvokeRepeating("CreateObstacle", Random.Range(30.0F, 60.0F), Random.Range(30.0F, 60.0F));
 	}
 	
 	void CreateObstacle()

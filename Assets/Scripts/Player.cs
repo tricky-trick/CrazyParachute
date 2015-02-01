@@ -10,9 +10,15 @@ public class Player : MonoBehaviour
 	int life = 3;
 	float time = 60f;
 	float timeToTransformation = 2.0f;
-	float timeJetack = 10f;
+	float timeJetack = 0;
 	bool isJetpack;
 	float timeBlinking = 0;
+	float timeJumping = 0.0f;
+
+	int fontSize;
+	int marginLeft;
+	int marginTop;
+
 	private float fingerStartTime  = 0.0f;
 	private Vector2 fingerStartPos = Vector2.zero;
 	
@@ -37,15 +43,10 @@ public class Player : MonoBehaviour
 
 	void Start()
 	{
-		score = PlayerPrefs.GetInt("score");
 		isJetpack = false;
 		HideChildren ();
 		HideExplode ();
-		player = GameObject.FindGameObjectWithTag("Player");
-		largeFont = new GUIStyle();
-
-		largeFont.fontSize = 30;
-		largeFont.normal.textColor = Color.red;
+		player = GameObject.Find("player");
 
 		if(Application.loadedLevel == 5){
 			playerSpritesJP = Resources.LoadAll<Sprite>("jetpack_man");
@@ -60,10 +61,15 @@ public class Player : MonoBehaviour
 			up = new Vector2(0, 100);
 			down = new Vector2(0, -200);
 		}
+		if(Application.loadedLevel > 1){
+			life = PlayerPrefs.GetInt("life") + 1;
+		}
 	}
 
 	void Update ()
 	{
+		if (Input.GetKeyDown(KeyCode.Escape)) { Application.Quit(); }
+
 		Vector2 viewPos = Camera.main.WorldToViewportPoint(transform.position);
 
 		RaycastHit hit;
@@ -86,7 +92,6 @@ public class Player : MonoBehaviour
 				if (hit.transform.tag == "arrow_right" ){
 					MoveRight();
 				}
-
 			}
 		}
 
@@ -233,14 +238,6 @@ public class Player : MonoBehaviour
 		}
 
 
-
-
-		time -= Time.deltaTime;
-		if ( time < 0 )
-		{
-			Application.LoadLevel(Application.loadedLevel + 1);
-			PlayerPrefs.SetInt("score",score);
-		}
 		if(Application.loadedLevel != 5){
 		if (isJetpack) {
 			left = new Vector2(-250, 0);
@@ -278,6 +275,13 @@ public class Player : MonoBehaviour
 		}
 
 		if (Application.loadedLevel == 9){
+			if(timeJumping >= 0){
+				timeJumping -= Time.deltaTime;
+			}
+			else{
+				rigidbody2D.gravityScale = 0.5f;
+			}
+
 			timeToTransformation -= Time.deltaTime;
 			if ( timeToTransformation < 0 )
 			{
@@ -302,6 +306,21 @@ public class Player : MonoBehaviour
 			}
 		}
 
+		if (life > 5)
+			life = 5;
+
+		for (int i = 1; i <= life; i++)
+		{
+			GameObject lifeO = GameObject.Find("life" + i.ToString());
+			lifeO.renderer.enabled = true;
+		}
+
+		for (int i = 5; i >life; i--)
+		{
+			GameObject lifeO = GameObject.Find("life" + i.ToString());
+			lifeO.renderer.enabled = false;
+		}
+
 	}
 
 	
@@ -316,8 +335,8 @@ public class Player : MonoBehaviour
 		else{
 			if (score > highscore){
 				highscore = score;
-				PlayerPrefs.SetInt("highscore", highscore);
 			}
+			PlayerPrefs.SetInt("highscore", highscore);
 			PlayerPrefs.SetInt("score", 0);
 			Application.LoadLevel(0);
 		}
@@ -326,12 +345,15 @@ public class Player : MonoBehaviour
 
 	void OnGUI () 
 	{
-		GUILayout.Label(" Score: " + score.ToString(), largeFont);
-		GUILayout.Label(" Time: " + time.ToString("0"), largeFont);
-		GUILayout.Label(" Life: " + life.ToString(), largeFont);
-		if(Application.loadedLevel != 5){
-			GUILayout.Label(" Jetpack: " + timeJetack.ToString("0"), largeFont);
-		}
+		GetFontSize();
+		var style = GUI.skin.GetStyle("Label");
+		style.alignment = TextAnchor.UpperLeft;
+		style.normal.textColor = Color.green;
+		style.fontSize = fontSize;
+
+		GUI.Label(new Rect (marginLeft,marginTop, 200, 100),score.ToString(), style);
+		//GUILayout.Label(" Time: " + time.ToString("0"), largeFont);
+		//GUI.Label(new Rect (100,90, 100, 50),life.ToString(), style);
 	}
 
 
@@ -346,6 +368,7 @@ public class Player : MonoBehaviour
 	{
 		if (other.tag == "coin") { 
 						score += 10; 
+			other.audio.Play();
 						Destroy (other.gameObject); 
 		} 
 		else if (other.tag == "jetpack") {
@@ -373,6 +396,11 @@ public class Player : MonoBehaviour
 				Die ();
 			}
 		}
+		else if (other.tag == "next_level_label"){
+			Application.LoadLevel(Application.loadedLevel + 1);
+			PlayerPrefs.SetInt("score",score);
+			PlayerPrefs.SetInt("life", life);
+		}
 		else {
 			if(!isJetpack){
 				if(timeBlinking<=0)
@@ -387,6 +415,7 @@ public class Player : MonoBehaviour
 				InvokeRepeating("Explosion", 0.0f, 1.0f);
 			}
 		}
+
 	}
 
 	void HideChildren()
@@ -508,8 +537,11 @@ public class Player : MonoBehaviour
 		}
 		else{
 			up = new Vector2(0,1000);
-			//rigidbody2D.velocity = new Vector2(0,50);
-			rigidbody2D.AddForce(up, ForceMode2D.Impulse);
+			if (timeJumping < 0){
+				timeJumping = 2.0f;
+				rigidbody2D.gravityScale = 0.3f;
+				rigidbody2D.AddForce(up, ForceMode2D.Impulse);
+			}
 		}
 	}
 
@@ -521,6 +553,37 @@ public class Player : MonoBehaviour
 		}
 		else{
 			rigidbody2D.AddForce(down);
+		}
+	}
+
+	void GetFontSize()
+	{
+		if (Screen.height <= 800 )
+		{
+			fontSize = 20;
+			marginLeft = 50;
+			marginTop = 10;
+		}
+
+		else if (Screen.height > 800 && Screen.height <= 1280)
+		{
+			fontSize = 30;
+			marginLeft = 70;
+			marginTop = 20;
+		}
+
+		else if (Screen.height > 1280 && Screen.height <= 2000)
+		{
+			fontSize = 40;
+			marginLeft = 110;
+			marginTop = 30;
+		}
+
+		else
+		{
+			fontSize = 50;
+			marginLeft = 130;
+			marginTop = 40;
 		}
 	}
 
