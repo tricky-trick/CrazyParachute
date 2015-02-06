@@ -5,6 +5,15 @@ public class PlayGameButton : MonoBehaviour {
 
 	int fontSize;
 
+	int score;
+
+	int highscore;
+
+	void Start()
+	{
+		score = PlayerPrefs.GetInt("score");
+	}
+
 	// Update is called once per frame
 	void Update () {
 
@@ -18,7 +27,18 @@ public class PlayGameButton : MonoBehaviour {
 		{
 			if (Physics.Raycast(ray, out hit)) {
 				if (hit.transform.tag == "next_level_button" ){
-					Application.LoadLevel(Application.loadedLevel + 1);
+					if (Application.loadedLevelName == "SceneEnd"){
+						highscore = PlayerPrefs.GetInt("highscore");
+						if (score > highscore){
+							highscore = score;
+						}
+						PlayerPrefs.SetInt("highscore", highscore);
+						PlayerPrefs.SetInt("score", 0);
+						Application.LoadLevel(0);
+					}
+					else{
+						Application.LoadLevel(Application.loadedLevel + 1);
+					}
 				}
 			}
 		}

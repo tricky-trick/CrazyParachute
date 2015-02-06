@@ -8,7 +8,7 @@ public class GenerateJetpack: MonoBehaviour {
 	// Use this for initialization
 	void Start()
 	{
-		InvokeRepeating("CreateObstacle", Random.Range(1.0F, 10.0F), Random.Range(10.0F, 30.0F));
+		InvokeRepeating("CreateObstacle", Random.Range(1.0F, 10.0F), Random.Range(15.0F, 40.0F));
 	}
 	
 	void CreateObstacle()

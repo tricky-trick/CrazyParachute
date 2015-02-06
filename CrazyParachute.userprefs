@@ -1,16 +1,16 @@
 ﻿<Properties>
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" PreferredExecutionTarget="MonoDevelop.Default" />
-  <MonoDevelop.Ide.Workbench ActiveDocument="Assets/Scripts/Player.cs">
+  <MonoDevelop.Ide.Workbench ActiveDocument="Assets/Scripts/PlayGameButton.cs">
     <Files>
-      <File FileName="Assets/Scripts/Player.cs" Line="309" Column="4" />
-      <File FileName="Assets/Scripts/PlayGameButton.cs" Line="27" Column="29" />
+      <File FileName="Assets/Scripts/Player.cs" Line="53" Column="3" />
+      <File FileName="Assets/Scripts/PlayGameButton.cs" Line="38" Column="1" />
     </Files>
     <Pads>
       <Pad Id="ProjectPad">
         <State expanded="True">
           <Node name="Assembly-CSharp" expanded="True">
             <Node name="Scripts" expanded="True">
-              <Node name="Player.cs" selected="True" />
+              <Node name="PlayGameButton.cs" selected="True" />
             </Node>
           </Node>
         </State>

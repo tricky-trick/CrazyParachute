@@ -19,6 +19,13 @@ public class Player : MonoBehaviour
 	int marginLeft;
 	int marginTop;
 
+	public AudioSource[] sounds;
+	public AudioSource coinSound;
+	public AudioSource fireballSound;
+	public AudioSource jetpackSound;
+	public AudioSource dieSound;
+	public AudioSource lifeSound;
+
 	private float fingerStartTime  = 0.0f;
 	private Vector2 fingerStartPos = Vector2.zero;
 	
@@ -34,27 +41,28 @@ public class Player : MonoBehaviour
 	public Vector2 down = new Vector2(0, -150);
 	GameObject player;
 	int rotation = 0;
-	public Sprite[] playerSpritesParachute;
-	public Sprite[] playerSpritesJP;
-	public Sprite[] playerSpritesSki;
+	public Sprite playerSpritesParachute;
+	public Sprite playerSpritesJP;
+	public Sprite playerSpritesSki;
 	
 	GUIStyle largeFont;
 
 
 	void Start()
 	{
+		score = PlayerPrefs.GetInt("score");
 		isJetpack = false;
 		HideChildren ();
 		HideExplode ();
 		player = GameObject.Find("player");
 
 		if(Application.loadedLevel == 5){
-			playerSpritesJP = Resources.LoadAll<Sprite>("jetpack_man");
-			foreach(Sprite s in playerSpritesJP)
-			if (s.name.Equals("jetpack_man")){
-				player.GetComponent<SpriteRenderer>().sprite = s;
-				break;
-			}
+			playerSpritesJP = Resources.Load<Sprite>("jetpack_man");
+//			foreach(Sprite s in playerSpritesJP)
+//			if (s.name.Equals("jetpack_man")){
+			player.GetComponent<SpriteRenderer>().sprite = playerSpritesJP;
+				//break;
+			//}
 			ShowChildren();
 			left = new Vector2(-100, 0);
 			right = new Vector2(100, 0);
@@ -64,6 +72,13 @@ public class Player : MonoBehaviour
 		if(Application.loadedLevel > 1){
 			life = PlayerPrefs.GetInt("life") + 1;
 		}
+
+		sounds = player.GetComponents<AudioSource>();
+		coinSound = sounds[0];
+		fireballSound = sounds[1];
+		jetpackSound = sounds[2];
+		dieSound = sounds[3];
+		lifeSound = sounds[4];
 	}
 
 	void Update ()
@@ -239,34 +254,28 @@ public class Player : MonoBehaviour
 
 
 		if(Application.loadedLevel != 5){
-		if (isJetpack) {
-			left = new Vector2(-250, 0);
-			right = new Vector2(250, 0);
-			up = new Vector2(0, 250);
-			down = new Vector2(0, -250);
-						timeJetack -= Time.deltaTime;
-						if (timeJetack < 0) {
-								isJetpack = false;
-								HideChildren ();
-								HideExplode();
-								timeJetack = 0;
-								foreach (Sprite s in playerSpritesParachute)
-										if (s.name.Equals ("player")) {
-												player.GetComponent<SpriteRenderer> ().sprite = s;
-												player.GetComponent<SpriteRenderer>().sprite = s;
-												Destroy(GetComponent<PolygonCollider2D>());
-												player.AddComponent<PolygonCollider2D>();
-												break;
-										}
-								//rigidbody2D.velocity = Vector2.zero;
-
-						}
-				} else {
-			up = new Vector2(0, 20);
-			left = new Vector2(-150, 0);
-			right = new Vector2(150, 0);
-			down = new Vector2(0, -150);
+			if (isJetpack) {
+				left = new Vector2(-250, 0);
+				right = new Vector2(250, 0);
+				up = new Vector2(0, 250);
+				down = new Vector2(0, -250);
+				timeJetack -= Time.deltaTime;
+				if (timeJetack < 0) {
+					isJetpack = false;
+					HideChildren ();
+					HideExplode();
+					timeJetack = 0;
+					player.GetComponent<SpriteRenderer> ().sprite = playerSpritesParachute;
+					Destroy(GetComponent<PolygonCollider2D>());
+					player.AddComponent<PolygonCollider2D>();
+					jetpackSound.Stop();;
 				}
+			} else {
+				up = new Vector2(0, 20);
+				left = new Vector2(-150, 0);
+				right = new Vector2(150, 0);
+				down = new Vector2(0, -150);
+			}
 		}
 
 		timeBlinking -= Time.deltaTime;
@@ -280,19 +289,6 @@ public class Player : MonoBehaviour
 			}
 			else{
 				rigidbody2D.gravityScale = 0.5f;
-			}
-
-			timeToTransformation -= Time.deltaTime;
-			if ( timeToTransformation < 0 )
-			{
-				playerSpritesSki = Resources.LoadAll<Sprite>("ski_man");
-				foreach(Sprite s in playerSpritesSki)
-				if (s.name.Equals("ski_man")){
-					player.GetComponent<SpriteRenderer>().sprite = s;
-					Destroy(GetComponent<PolygonCollider2D>());
-					player.AddComponent<PolygonCollider2D>();
-					break;
-				}
 			}
 
 			float maxSpeed = 3.0f;
@@ -326,6 +322,7 @@ public class Player : MonoBehaviour
 	
 	void Die()
 	{
+		dieSound.Play();
 		if (life > 0){
 			life--;
 			transform.position = new Vector2(0.0f, 5.0f);
@@ -333,6 +330,7 @@ public class Player : MonoBehaviour
 			InvokeRepeating("Blinking", 0.0f, 0.2f);
 		}
 		else{
+			highscore = PlayerPrefs.GetInt("highscore");
 			if (score > highscore){
 				highscore = score;
 			}
@@ -352,42 +350,37 @@ public class Player : MonoBehaviour
 		style.fontSize = fontSize;
 
 		GUI.Label(new Rect (marginLeft,marginTop, 200, 100),score.ToString(), style);
-		//GUILayout.Label(" Time: " + time.ToString("0"), largeFont);
-		//GUI.Label(new Rect (100,90, 100, 50),life.ToString(), style);
 	}
 
 
 	void Awake()
 	{
 		// load all frames in fruitsSprites array
-		playerSpritesJP = Resources.LoadAll<Sprite>("jetpack_man");
-		playerSpritesParachute = Resources.LoadAll<Sprite>("player");
-		playerSpritesSki = Resources.LoadAll<Sprite>("ski_man");
+		playerSpritesJP = Resources.Load<Sprite>("jetpack_man");
+		playerSpritesParachute = Resources.Load<Sprite>("player");
+		playerSpritesSki = Resources.Load<Sprite>("ski_man");
 	}
 	void OnTriggerEnter2D (Collider2D other)
 	{
 		if (other.tag == "coin") { 
 						score += 10; 
-			other.audio.Play();
+			coinSound.Play();
 						Destroy (other.gameObject); 
 		} 
 		else if (other.tag == "jetpack") {
-			playerSpritesJP = Resources.LoadAll<Sprite>("jetpack_man");
-			foreach(Sprite s in playerSpritesJP)
-			if (s.name.Equals("jetpack_man")){
-				player.GetComponent<SpriteRenderer>().sprite = s;
-				player.GetComponent<SpriteRenderer>().sprite = s;
-				Destroy(GetComponent<PolygonCollider2D>());
-				player.AddComponent<PolygonCollider2D>();
-				break;
-			}
+			playerSpritesJP = Resources.Load<Sprite>("jetpack_man");
+			player.GetComponent<SpriteRenderer>().sprite = playerSpritesJP;
+			Destroy(GetComponent<PolygonCollider2D>());
+			player.AddComponent<PolygonCollider2D>();
 			Destroy (other.gameObject); 
 			isJetpack = true;
 			timeJetack = 10f;
 			ShowChildren();
+			jetpackSound.Play();
 		}
 		else if (other.tag == "life"){
 			life++;
+			lifeSound.Play();
 			Destroy (other.gameObject);
 		}
 		else if (other.tag == "wall"){
@@ -411,6 +404,7 @@ public class Player : MonoBehaviour
 			else
 			{
 				score += 10; 
+				fireballSound.Play();
 				Destroy (other.gameObject);
 				InvokeRepeating("Explosion", 0.0f, 1.0f);
 			}
@@ -539,7 +533,7 @@ public class Player : MonoBehaviour
 			up = new Vector2(0,1000);
 			if (timeJumping < 0){
 				timeJumping = 2.0f;
-				rigidbody2D.gravityScale = 0.3f;
+				rigidbody2D.gravityScale = 0.25f;
 				rigidbody2D.AddForce(up, ForceMode2D.Impulse);
 			}
 		}
