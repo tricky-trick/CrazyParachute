@@ -483,17 +483,18 @@ public class Player : MonoBehaviour
 
 	private void MoveLeft()
 	{
-		if (Application.loadedLevel != 9){
+		if(Application.loadedLevel == 11){
 			rigidbody2D.velocity = Vector2.zero;
 			rigidbody2D.AddForce(left);
-			if(rotation > 0 ){
-				transform.Rotate(0, 0, 10.0f);
-				rotation -= 10;
-			}
-			else if(rotation == 0){
-				transform.Rotate(0, 0, 2.0f);
-				rotation -= 5;
-			}
+			Quaternion target = Quaternion.Euler(0, 0, 0);
+			transform.rotation = Quaternion.Slerp(transform.rotation,target,Time.deltaTime * 100.0f);
+		}
+
+		else if (Application.loadedLevel != 9){
+			rigidbody2D.velocity = Vector2.zero;
+			rigidbody2D.AddForce(left);
+			Quaternion target = Quaternion.Euler(0, 0, 10);
+			transform.rotation = Quaternion.Slerp(transform.rotation,target,Time.deltaTime * 100.0f);
 		}
 		else{
 			transform.Rotate(0, 0, 5.0f);
@@ -504,17 +505,17 @@ public class Player : MonoBehaviour
 
 	private void MoveRight()
 	{
-		if (Application.loadedLevel != 9){
+		if(Application.loadedLevel == 11){
 			rigidbody2D.velocity = Vector2.zero;
 			rigidbody2D.AddForce(right);
-			if(rotation < 0 ){
-				transform.Rotate(0, 0, -10.0f);
-				rotation += 10;
-			}
-			else if(rotation == 0){
-				transform.Rotate(0, 0, -2.0f);
-				rotation += 5;
-			}
+			Quaternion target = Quaternion.Euler(0, 180, 0);
+			transform.rotation = Quaternion.Slerp(transform.rotation,target,Time.deltaTime * 100.0f);
+		}
+		else if (Application.loadedLevel != 9){
+			rigidbody2D.velocity = Vector2.zero;
+			rigidbody2D.AddForce(right);
+			Quaternion target = Quaternion.Euler(0, 0, -10);
+			transform.rotation = Quaternion.Slerp(transform.rotation,target,Time.deltaTime * 100.0f);
 		}
 		else{
 			transform.Rotate(0, 0, -5.0f);
@@ -525,7 +526,9 @@ public class Player : MonoBehaviour
 
 	private void MoveUp()
 	{
-		if (Application.loadedLevel != 9){
+		if(Application.loadedLevel ==11){
+		}
+		else if (Application.loadedLevel != 9){
 			rigidbody2D.velocity = Vector2.zero;
 			rigidbody2D.AddForce(up);
 		}
